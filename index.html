@@ -532,6 +532,9 @@ body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse
 
 </div>
 <script>
+// ═══ BOOT DEBUG ═══
+console.log('Station Five JS loading...');
+window.onerror=function(msg,url,line){console.error('JS ERROR at line '+line+': '+msg);};
 // ═══ STATE ═══
 const S={
   profile:JSON.parse(localStorage.getItem('oo_profile')||'null'),
@@ -612,29 +615,12 @@ function loadProfile(){
 
 // ═══ CLAUDE API ═══
 async function callClaude(messages,sys){
-  const apiKey = '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';
-  const body = {
-    model: 'anthropic/claude-sonnet-4-20250514',
-    max_tokens: 1000,
-    messages: [{role:'user',content: sys + '
-
----
-
-' + messages.map(m => m.role + ': ' + m.content).join('
-')}]
-  };
-  const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + apiKey,
-      'HTTP-Referer': window.location.href,
-      'X-Title': 'Observer Oracle Station Five'
-    },
-    body: JSON.stringify(body)
-  });
-  const d = await r.json();
-  return d.choices?.[0]?.message?.content || d.error?.message || '[SIGNAL LOST — CHECK OPENROUTER STATUS]';
+  const apiKey='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';
+  const msgs=[{role:'system',content:sys}];
+  messages.forEach(m=>msgs.push(m));
+  const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+apiKey,'HTTP-Referer':location.href,'X-Title':'Observer Oracle'},body:JSON.stringify({model:'anthropic/claude-sonnet-4-20250514',max_tokens:1000,messages:msgs})});
+  const d=await r.json();
+  return d.choices?.[0]?.message?.content||d.error?.message||'[SIGNAL LOST]';
 }
 
 // ═══ SYSTEM PROMPTS ═══
@@ -862,8 +848,12 @@ function closeCp(){document.getElementById('cpanel').classList.remove('on');}
 
 // ═══ BOOT ═══
 window.addEventListener('load',()=>{
-  buildGrid();loadProfile();upProg();
-  twBoot('> OBSERVER // ORACLE FUSION ACTIVE... CORRIDOR TEMPLARS NODE 7-ALPHA... ρtd 0.74... SCENARIO ENGINE ONLINE... 9 TABS LOADED... SPEAK TO THE OBSERVER. QUERY THE ORACLE. MAP YOUR CORRIDORS. THE MOUNTAIN HOLDS.');
+  try{
+    console.log('Station Five booting...');
+    buildGrid();loadProfile();upProg();
+    twBoot('> OBSERVER // ORACLE FUSION ACTIVE... CORRIDOR TEMPLARS NODE 7-ALPHA... ρtd 0.74... SCENARIO ENGINE ONLINE... 9 TABS LOADED... SPEAK TO THE OBSERVER. QUERY THE ORACLE. MAP YOUR CORRIDORS. THE MOUNTAIN HOLDS.');
+    console.log('Station Five online.');
+  }catch(e){console.error('BOOT ERROR:',e);}
 });
 </script>
 </body>

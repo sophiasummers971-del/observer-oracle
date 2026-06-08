@@ -1,13 +1,13 @@
 {
   "name": "observer-oracle",
   "version": "1.0.0",
-  "description": "OBSERVER // ORACLE — Station Five. A single-file intelligence terminal for predictive scenario mapping, virtual experiments, and classified dossiers.",
+  "description": "OBSERVER // ORACLE — Station Five. Single-file intelligence terminal.",
   "main": "index.html",
   "scripts": {
     "start": "npx serve . -p 8000",
     "dev": "npx serve . -p 8000 -s"
   },
-  "keywords": ["sci-fi", "terminal", "arg", "predictive-intelligence", "propulsion-physics", "foia", "static-site"],
+  "keywords": ["sci-fi", "terminal", "arg", "predictive-intelligence", "propulsion-physics", "foia"],
   "author": "sophiasummers971-del",
   "license": "MIT",
   "repository": {

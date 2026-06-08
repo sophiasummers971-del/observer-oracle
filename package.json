@@ -1,0 +1,18 @@
+{
+  "name": "observer-oracle",
+  "version": "1.0.0",
+  "description": "OBSERVER // ORACLE — Station Five. A single-file intelligence terminal for predictive scenario mapping, virtual experiments, and classified dossiers.",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve . -p 8000",
+    "dev": "npx serve . -p 8000 -s"
+  },
+  "keywords": ["sci-fi", "terminal", "arg", "predictive-intelligence", "propulsion-physics", "foia", "static-site"],
+  "author": "sophiasummers971-del",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sophiasummers971-del/observer-oracle.git"
+  },
+  "homepage": "https://sophiasummers971-del.github.io/observer-oracle/"
+}

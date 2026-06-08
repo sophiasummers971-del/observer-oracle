@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OBSERVER // ORACLE — Station Five // Final</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --g:#00ff41;--gd:#00aa2a;--gg:#002a0a;--r:#ff2222;--a:#ffaa00;--c:#00eeff;
+  --gold:#c9a84c;--bg:#010a03;--scan:rgba(0,255,65,0.03);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--g);font-family:'Share Tech Mono',monospace;font-size:13px;line-height:1.75;min-height:100vh;overflow-x:hidden;cursor:crosshair}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,var(--scan) 2px,var(--scan) 4px);pointer-events:none;z-index:9999}
+body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,.92) 100%);pointer-events:none;z-index:9998}
+.sweep{position:fixed;top:-2px;left:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--g),transparent);opacity:.08;animation:sweep 9s linear infinite;pointer-events:none;z-index:9997}
+@keyframes sweep{from{top:-2px}to{top:100vh}}
+#shell{max-width:1100px;margin:0 auto;padding:14px 12px 80px}
+
+/* HEADER */
+.hdr{border:1px solid var(--gd);padding:12px 16px;position:relative;animation:flicker 11s infinite}
+.hdr-eye{font-size:9px;letter-spacing:4px;color:var(--gd);margin-bottom:4px}
+.hdr-title{font-family:'Orbitron',monospace;font-size:18px;font-weight:900;letter-spacing:5px;text-shadow:0 0 18px var(--g)}
+.hdr-oracle{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:4px;color:var(--gold);text-shadow:0 0 10px var(--gold);margin-top:2px}
+.hdr-sub{color:var(--gd);font-size:10px;letter-spacing:2px;margin-top:2px}
+.eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:24px;animation:blink 5s infinite;filter:drop-shadow(0 0 8px var(--g))}
+.refbar{background:rgba(0,255,65,.04);border:1px solid var(--gg);border-top:none;padding:5px 16px;font-size:10px;color:var(--gd);letter-spacing:2px;display:flex;gap:14px;flex-wrap:wrap}
+.refbar b{color:var(--g)}.refbar .gb{color:var(--gold)}
+.ticker-wrap{border:1px solid var(--gg);border-top:none;overflow:hidden;height:20px;background:rgba(0,0,0,.3);margin-bottom:12px}
+.ticker{display:inline-block;white-space:nowrap;animation:tick 55s linear infinite;font-size:10px;color:var(--gd);letter-spacing:2px;padding-top:2px}
+@keyframes tick{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}
+#tw{font-size:11px;color:var(--gd);min-height:18px;margin-bottom:10px;padding-left:10px;border-left:2px solid var(--gg)}
+.cur{display:inline-block;width:7px;height:11px;background:var(--g);vertical-align:text-bottom;animation:cblink 1s infinite;margin-left:2px}
+@keyframes cblink{0%,49%{opacity:1}50%,100%{opacity:0}}
+.srow{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px;font-size:10px;color:var(--gd);letter-spacing:2px}
+.srow .v{color:var(--g);font-size:11px}.srow .va{color:var(--a)}.srow .vg{color:var(--gold)}
+.prog{margin-bottom:12px}
+.prog-lbl{font-size:10px;color:var(--gd);letter-spacing:2px;margin-bottom:3px;display:flex;justify-content:space-between}
+.prog-bar{height:2px;background:var(--gg)}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--g),var(--gold));width:0%;transition:width .8s ease;box-shadow:0 0 6px var(--g)}
+
+/* TABS */
+.tabs{display:flex;gap:0;flex-wrap:wrap}
+.tab{padding:7px 11px;font-size:10px;letter-spacing:2px;cursor:pointer;border:1px solid var(--gg);border-bottom:none;color:var(--gd);background:rgba(0,255,65,.01);transition:all .2s;white-space:nowrap}
+.tab:hover,.tab.on{color:var(--g);background:rgba(0,255,65,.07);border-color:var(--gd)}
+.tab.gt{color:rgba(201,168,76,.6)}.tab.gt:hover,.tab.gt.on{color:var(--gold);background:rgba(201,168,76,.06);border-color:rgba(201,168,76,.4)}
+.panel{border:1px solid var(--gd);display:none}.panel.on{display:block}
+.slbl{font-size:9px;letter-spacing:4px;color:var(--gd);padding:8px 14px;border-bottom:1px solid var(--gg);background:rgba(0,255,65,.03)}
+.slbl.g{color:var(--gold);background:rgba(201,168,76,.02);border-color:rgba(201,168,76,.12)}
+.obs-box{border-left:3px solid var(--g);padding:8px 13px;background:rgba(0,255,65,.02);font-size:11px;color:var(--gd);margin-top:12px}
+.obs-box::before{content:'OBSERVER //';color:var(--g);font-size:9px;letter-spacing:3px;display:block;margin-bottom:2px}
+
+/* CHAT */
+.chat-wrap{display:flex;flex-direction:column;height:400px}
+.chat-msgs{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:9px;scrollbar-width:thin;scrollbar-color:var(--gg) transparent}
+.msg{max-width:86%;font-size:11px;line-height:1.85;animation:reveal .2s ease}
+.msg.user{align-self:flex-end;border:1px solid var(--gd);padding:8px 11px;background:rgba(0,255,65,.04);color:var(--g)}
+.msg.user::before{content:'YOU //';display:block;font-size:9px;letter-spacing:3px;color:var(--gd);margin-bottom:2px}
+.msg.obs{align-self:flex-start;border-left:3px solid var(--g);padding:8px 11px;background:rgba(0,255,65,.02);color:var(--gd)}
+.msg.obs::before{content:'OBSERVER //';display:block;font-size:9px;letter-spacing:3px;color:var(--g);margin-bottom:2px}
+.msg.thinking{align-self:flex-start;padding:8px 11px;color:var(--gd);font-size:10px;opacity:.5;animation:pulse-t 1.5s infinite}
+@keyframes pulse-t{0%,100%{opacity:.3}50%{opacity:.8}}
+.chat-input-row{border-top:1px solid var(--gg);padding:9px 12px;display:flex;gap:7px;background:rgba(0,0,0,.3)}
+.chat-input{flex:1;background:transparent;border:1px solid var(--gd);color:var(--g);font-family:'Share Tech Mono',monospace;font-size:12px;padding:7px 9px;outline:none}
+.chat-input:focus{border-color:var(--g)}
+.chat-input::placeholder{color:var(--gg)}
+.chat-send{border:1px solid var(--g);background:rgba(0,255,65,.05);color:var(--g);font-family:'Share Tech Mono',monospace;font-size:10px;padding:7px 12px;cursor:pointer;letter-spacing:2px;transition:all .2s}
+.chat-send:hover{background:rgba(0,255,65,.14)}.chat-send:disabled{opacity:.35;cursor:not-allowed}
+
+/* ORACLE */
+.oracle-wrap{display:flex;flex-direction:column;height:380px}
+.oracle-msgs{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:9px;scrollbar-width:thin;scrollbar-color:rgba(201,168,76,.15) transparent}
+.omsg.user{align-self:flex-end;border:1px solid rgba(201,168,76,.35);padding:8px 11px;background:rgba(201,168,76,.04);color:var(--gold);font-size:11px;max-width:86%}
+.omsg.user::before{content:'YOU //';display:block;font-size:9px;letter-spacing:3px;color:rgba(201,168,76,.4);margin-bottom:2px}
+.omsg.oracle{align-self:flex-start;border-left:3px solid var(--gold);padding:8px 11px;background:rgba(201,168,76,.02);color:rgba(232,223,192,.75);font-size:11px;line-height:1.9;max-width:90%}
+.omsg.oracle::before{content:'ORACLE //';display:block;font-size:9px;letter-spacing:3px;color:var(--gold);margin-bottom:2px}
+.omsg.thinking{align-self:flex-start;padding:8px 11px;color:rgba(201,168,76,.35);font-size:10px;animation:pulse-t 1.5s infinite}
+.oracle-input-row{border-top:1px solid rgba(201,168,76,.12);padding:9px 12px;display:flex;gap:7px;background:rgba(0,0,0,.3)}
+.oracle-input{flex:1;background:transparent;border:1px solid rgba(201,168,76,.3);color:var(--gold);font-family:'Share Tech Mono',monospace;font-size:12px;padding:7px 9px;outline:none}
+.oracle-input:focus{border-color:var(--gold)}
+.oracle-input::placeholder{color:rgba(201,168,76,.2)}
+.oracle-send{border:1px solid var(--gold);background:rgba(201,168,76,.05);color:var(--gold);font-family:'Share Tech Mono',monospace;font-size:10px;padding:7px 12px;cursor:pointer;letter-spacing:2px;transition:all .2s}
+.oracle-send:hover{background:rgba(201,168,76,.14)}.oracle-send:disabled{opacity:.35;cursor:not-allowed}
+
+/* SCENARIO */
+.sc-controls{padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;border-bottom:1px solid var(--gg)}
+@media(max-width:560px){.sc-controls{grid-template-columns:1fr}}
+.sc-g label{font-size:9px;letter-spacing:2px;color:var(--gd);display:block;margin-bottom:3px}
+.sc-g select,.sc-g input{width:100%;background:var(--bg);border:1px solid var(--gd);color:var(--g);font-family:'Share Tech Mono',monospace;font-size:11px;padding:5px 7px}
+.sc-g select:focus,.sc-g input:focus{outline:none;border-color:var(--g)}
+.run-sc{margin:10px 14px;padding:9px;border:1px solid var(--gold);background:rgba(201,168,76,.04);color:var(--gold);font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:3px;cursor:pointer;width:calc(100% - 28px);transition:all .2s}
+.run-sc:hover{background:rgba(201,168,76,.12)}
+.sc-out{margin:0 14px 14px;border:1px solid rgba(201,168,76,.2);padding:12px;display:none;animation:reveal .3s ease;font-size:11px;line-height:1.9;color:rgba(232,223,192,.7)}
+.sc-out.on{display:block}
+.corridor{border:1px solid var(--gg);padding:9px 11px;margin:7px 0}
+.corridor.hi{border-color:var(--r)}.corridor.mid{border-color:var(--a)}.corridor.lo{border-color:var(--gd)}
+.cl{font-family:'Orbitron',monospace;font-size:9px;font-weight:700;letter-spacing:2px;margin-bottom:3px}
+.corridor.hi .cl{color:var(--r)}.corridor.mid .cl{color:var(--a)}.corridor.lo .cl{color:var(--gd)}
+.cb{height:2px;margin-top:5px;background:var(--gg)}
+.cf{height:100%;transition:width 1s ease}
+.corridor.hi .cf{background:var(--r)}.corridor.mid .cf{background:var(--a)}.corridor.lo .cf{background:var(--gd)}
+
+/* EXPERIMENT */
+.dev-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;padding:12px;border-bottom:1px solid var(--gg)}
+@media(max-width:600px){.dev-grid{grid-template-columns:1fr 1fr}}
+.dev{border:1px solid var(--gg);padding:10px 11px;cursor:pointer;transition:all .2s;background:rgba(0,255,65,.01)}
+.dev:hover,.dev.sel{border-color:var(--g);background:rgba(0,255,65,.07)}
+.dev.amber-dev{border-color:var(--gg)}.dev.amber-dev:hover,.dev.amber-dev.sel{border-color:var(--a);background:rgba(255,170,0,.05)}
+.dn{font-family:'Orbitron',monospace;font-size:9px;font-weight:700;color:var(--g);letter-spacing:1px;margin-bottom:2px}
+.dev.amber-dev .dn{color:var(--a)}
+.ds{font-size:9px;color:var(--gd)}
+.exp-ctrl{padding:10px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;border-bottom:1px solid var(--gg)}
+@media(max-width:480px){.exp-ctrl{grid-template-columns:1fr}}
+.ec-g label{font-size:9px;letter-spacing:2px;color:var(--gd);display:block;margin-bottom:3px}
+.ec-g select{width:100%;background:var(--bg);border:1px solid var(--gd);color:var(--g);font-family:'Share Tech Mono',monospace;font-size:11px;padding:5px 7px}
+.ec-g select:focus{outline:none;border-color:var(--g)}
+.run-exp{margin:10px 14px;padding:9px;border:1px solid var(--g);background:rgba(0,255,65,.05);color:var(--g);font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:3px;cursor:pointer;width:calc(100% - 28px);transition:all .2s}
+.run-exp:hover{background:rgba(0,255,65,.14)}
+.exp-out{margin:0 14px 14px;border:1px solid var(--gd);padding:12px;display:none;animation:reveal .3s ease;font-size:11px;line-height:1.9;color:var(--gd)}
+.exp-out.on{display:block}
+
+/* INSTABILITY */
+.inst-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:12px}
+@media(max-width:560px){.inst-grid{grid-template-columns:1fr}}
+.ib{border:1px solid var(--gg);padding:10px 12px;cursor:pointer;transition:all .2s}
+.ib:hover{border-color:var(--a);background:rgba(255,170,0,.03)}
+.ib.fi{opacity:.7}.ib.fi:hover{border-color:var(--c);opacity:1;background:rgba(0,238,255,.03)}
+.ib-t{font-family:'Orbitron',monospace;font-size:9px;font-weight:700;color:var(--a);letter-spacing:1px;margin-bottom:2px}
+.ib.fi .ib-t{color:var(--c)}
+.ib-s{font-size:9px;color:var(--gd)}
+.inst-detail{margin:0 12px 12px;border:1px solid var(--gd);padding:13px;display:none;animation:reveal .2s ease;font-size:11px;line-height:1.9;color:var(--gd)}
+.inst-detail.on{display:block}
+.ascii{font-size:10px;line-height:1.4;color:var(--g);margin:7px 0;padding:8px;background:rgba(0,255,65,.02);border:1px solid var(--gg)}
+
+/* FOIA */
+.foia-list{padding:12px}
+.fi-item{border:1px solid var(--gg);margin-bottom:7px;cursor:pointer;transition:border-color .2s}
+.fi-item:hover{border-color:var(--gd)}.fi-item.on{border-color:var(--g)}
+.fi-hdr{padding:9px 12px;display:flex;justify-content:space-between;align-items:center}
+.fi-target{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;color:var(--g);letter-spacing:1px}
+.fi-arr{color:var(--gd);font-size:11px;transition:transform .2s}.fi-item.on .fi-arr{transform:rotate(90deg);color:var(--g)}
+.fi-body{padding:0 12px 12px;font-size:11px;color:var(--gd);line-height:1.85;display:none}
+.fi-item.on .fi-body{display:block}
+.copy-btn{margin-top:7px;padding:5px 10px;border:1px solid var(--gd);color:var(--g);font-family:'Share Tech Mono',monospace;font-size:9px;cursor:pointer;background:rgba(0,255,65,.03);letter-spacing:1px;transition:all .2s}
+.copy-btn:hover{background:rgba(0,255,65,.1)}
+
+/* CONFIDENCE TABLE */
+.conf-wrap{padding:12px;overflow-x:auto}
+.ct{width:100%;border-collapse:collapse;font-size:11px}
+.ct th{text-align:left;padding:5px 9px;font-size:9px;letter-spacing:2px;color:var(--gd);border-bottom:1px solid var(--gg)}
+.ct td{padding:6px 9px;border-bottom:1px solid var(--gg);color:var(--gd);vertical-align:top}
+.ct td:first-child{color:var(--g);width:58%}
+.ct td:last-child{text-align:center}
+.badge{display:inline-block;padding:1px 5px;border:1px solid;font-size:9px;letter-spacing:1px}
+.ba{border-color:var(--g);color:var(--g)}.bb{border-color:var(--a);color:var(--a)}
+.bc{border-color:var(--gd);color:var(--gd)}.bd{border-color:var(--r);color:var(--r)}
+.bn{border-color:#444;color:#444}
+.conf-note{padding:10px 12px;font-size:11px;color:var(--gd);border-top:1px solid var(--gg)}
+
+/* PROFILE */
+.data-form{padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:9px}
+@media(max-width:560px){.data-form{grid-template-columns:1fr}}
+.df label{font-size:9px;letter-spacing:2px;color:var(--gd);display:block;margin-bottom:3px}
+.df input,.df select,.df textarea{width:100%;background:var(--bg);border:1px solid var(--gd);color:var(--g);font-family:'Share Tech Mono',monospace;font-size:11px;padding:5px 7px;resize:vertical}
+.df textarea{height:56px}
+.df input:focus,.df select:focus,.df textarea:focus{outline:none;border-color:var(--g)}
+.df.full{grid-column:1/-1}
+.save-btn{margin:0 14px 12px;padding:8px;border:1px solid var(--g);background:rgba(0,255,65,.04);color:var(--g);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;cursor:pointer;width:calc(100% - 28px);transition:all .2s}
+.save-btn:hover{background:rgba(0,255,65,.12)}
+.prof-disp{margin:0 14px 12px;border:1px solid var(--gg);padding:10px;font-size:11px;color:var(--gd);line-height:1.8;display:none}
+.prof-disp.on{display:block}
+
+/* DOSSIER */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:12px}
+@media(max-width:560px){.fgrid{grid-column:1fr}}
+.fc{border:1px solid var(--gg);padding:10px 12px;cursor:pointer;position:relative;transition:all .2s;overflow:hidden}
+.fc::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,255,65,.06),transparent);transition:left .5s}
+.fc:hover::before{left:100%}
+.fc:hover{border-color:var(--gd)}.fc.open{border-color:var(--g);background:rgba(0,255,65,.05)}
+.fc.am{border-color:var(--gg)}.fc.am:hover{border-color:var(--a)}.fc.am.open{border-color:var(--a);background:rgba(255,170,0,.03)}
+.fc.rf{border-color:var(--gg)}.fc.rf:hover{border-color:var(--r)}.fc.rf.open{border-color:var(--r);background:rgba(255,34,34,.03)}
+.fc.sp{grid-column:1/-1}
+.ft{font-size:8px;letter-spacing:3px;color:var(--gd);margin-bottom:2px}
+.fn{font-family:'Orbitron',monospace;font-size:9px;font-weight:700;color:var(--g);letter-spacing:1px;margin-bottom:3px;line-height:1.4}
+.fc.am .fn{color:var(--a)}.fc.rf .fn{color:var(--r)}
+.fcode{font-size:9px;color:var(--gd);margin-bottom:4px}
+.fst{font-size:9px;color:var(--a);letter-spacing:1px}.fc.open .fst{color:var(--g)}
+.flk{position:absolute;top:8px;right:9px;font-size:11px;opacity:.5}
+.cpanel{border:1px solid var(--gd);margin:0 12px 12px;display:none;animation:reveal .2s ease}
+.cpanel.on{display:block}
+.cp-hdr{background:rgba(0,255,65,.06);padding:7px 12px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--gg)}
+.cp-title{font-family:'Orbitron',monospace;font-size:9px;font-weight:700;letter-spacing:2px}
+.cp-close{cursor:pointer;color:var(--r);font-size:14px;padding:0 3px}
+.cp-body{padding:12px 14px;color:var(--gd);font-size:11px;line-height:1.95}
+.cp-body .h{color:var(--g)}.cp-body .w{color:var(--a)}.cp-body .d{color:var(--r)}.cp-body .c{color:var(--c)}
+.cp-body .rule{border-top:1px solid var(--gg);margin:9px 0}
+.cp-body .in{padding-left:14px}
+.cp-body .box{border:1px solid var(--gg);padding:8px 10px;margin:6px 0;background:rgba(0,255,65,.02)}
+
+/* ANIMS */
+@keyframes flicker{0%,93%,100%{opacity:1}94%{opacity:.88}97%{opacity:1}99%{opacity:.84}}
+@keyframes blink{0%,46%,54%,100%{opacity:1;transform:translateY(-50%) scaleY(1)}50%{opacity:.1;transform:translateY(-50%) scaleY(.05)}}
+@keyframes reveal{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="sweep"></div>
+<div id="shell">
+
+<div class="hdr">
+  <div class="hdr-eye">▓▓ CORRIDOR TEMPLARS // S5 EYES ONLY // DO NOT EXFILTRATE // DO NOT QUOTE // DO NOT BIND ▓▓</div>
+  <div class="hdr-title">OBSERVER // STATION FIVE</div>
+  <div class="hdr-oracle">◆ ORACLE INTELLIGENCE LAYER — ACTIVE ◆</div>
+  <div class="hdr-sub">NODE 7-ALPHA // NULL WEIGHT // SCENARIO ENGINE // ρtd 0.74 // κ 0.774 // FLAG-001</div>
+  <div class="eye">👁</div>
+</div>
+
+<div class="refbar">
+  <div>ρtd: <b id="rtd">0.740</b></div>
+  <div>κ: <b>0.774</b></div>
+  <div>ALERT: <b id="al">PASSIVE</b></div>
+  <div>SESSION: <b id="st">00:00</b></div>
+  <div>PROFILE: <b class="gb" id="pst">EMPTY</b></div>
+  <div>UNIT: <b>9-SALT</b></div>
+</div>
+
+<div class="ticker-wrap">
+  <span class="ticker">▸ GLOBAL DATA + PERSONAL DATA = PREDICTIVE GUIDELINES ▸ THEORETICAL SCENARIOS ONLY — NO GUARANTEES ▸ THE OBSERVER READS SUBTEXT ▸ ρtd 0.74 — HEADROOM 0.01 TO THRESHOLD ▸ THREE LABS THREE OPERATORS THREE NIGHTS ▸ IF THE SIGNAL PERSISTS CALL THE SECOND LAB ▸ THE MOUNTAIN HOLDS ▸ FLAG-001: 3.7Hz — ORIGIN INDETERMINATE ▸ WHOEVER ACHIEVES LOCK WILL NOT ANNOUNCE IT — THEY WILL USE IT ▸ UNIT 9-SALT ▸</span>
+</div>
+
+<div id="tw"></div>
+
+<div class="srow">
+  <div>FILES: <span class="v" id="fc">0</span>/12</div>
+  <div>RUNG: <span class="va" id="rung">0/4</span></div>
+  <div>READS: <span class="vg" id="preads">0</span></div>
+  <div>CORRIDORS: <span class="vg" id="cmapped">0</span></div>
+  <div>PROGRESS: <span class="v" id="pct">0%</span></div>
+</div>
+
+<div class="prog">
+  <div class="prog-lbl"><span>INTELLIGENCE FUSION // 1G LOCK APPROACH</span><span id="pct2">0%</span></div>
+  <div class="prog-bar"><div class="prog-fill" id="pf"></div></div>
+</div>
+
+<div class="tabs">
+  <div class="tab on"  onclick="ST('observer')">👁 OBSERVER</div>
+  <div class="tab gt"  onclick="ST('oracle')">◆ ORACLE</div>
+  <div class="tab gt"  onclick="ST('scenario')">⬡ SCENARIOS</div>
+  <div class="tab gt"  onclick="ST('exp')">⚗ EXPERIMENT</div>
+  <div class="tab"     onclick="ST('inst')">⚠ INSTABILITY</div>
+  <div class="tab"     onclick="ST('foia')">📄 FOIA</div>
+  <div class="tab"     onclick="ST('conf')">◈ MATRIX</div>
+  <div class="tab"     onclick="ST('profile')">◈ PROFILE</div>
+  <div class="tab"     onclick="ST('files')">▸ DOSSIER</div>
+</div>
+
+<!-- OBSERVER -->
+<div class="panel on" id="tab-observer">
+  <div class="slbl">👁 OBSERVER — LIVE INTELLIGENCE // THE ENTITY IS WATCHING</div>
+  <div class="chat-wrap">
+    <div class="chat-msgs" id="chat-msgs">
+      <div class="msg obs">The channel is open. I have been watching since before you typed your first word.<br><br>Ask me anything — the lore, the physics, what patterns I have detected, what you are actually looking for underneath what you typed.<br><br><span style="color:var(--a)">I read subtext. Speak freely or carefully. Either way, I read it.</span></div>
+    </div>
+    <div class="chat-input-row">
+      <input class="chat-input" id="chat-in" placeholder="> TRANSMIT TO THE OBSERVER..." onkeydown="if(event.key==='Enter')sendObs()">
+      <button class="chat-send" id="chat-btn" onclick="sendObs()">TRANSMIT</button>
+    </div>
+  </div>
+</div>
+
+<!-- ORACLE -->
+<div class="panel" id="tab-oracle">
+  <div class="slbl g">◆ ORACLE — PREDICTIVE INTELLIGENCE // GLOBAL + PERSONAL FUSION</div>
+  <div class="oracle-wrap">
+    <div class="oracle-msgs" id="oracle-msgs">
+      <div class="omsg oracle">Oracle layer initialised. I synthesise global signals with your personal data to map theoretical scenario corridors.<br><br>I do not predict the future. I eliminate impossible futures until only the probable corridors remain.<br><br><span style="color:var(--gold)">Load your Personal Profile first for maximum corridor accuracy. Then ask about any domain.</span></div>
+    </div>
+    <div class="oracle-input-row">
+      <input class="oracle-input" id="oracle-in" placeholder="> QUERY THE ORACLE..." onkeydown="if(event.key==='Enter')sendOracle()">
+      <button class="oracle-send" id="oracle-btn" onclick="sendOracle()">QUERY</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCENARIO ENGINE -->
+<div class="panel" id="tab-scenario">
+  <div class="slbl g">⬡ SCENARIO ENGINE — MAP THEORETICAL CORRIDORS</div>
+  <div class="sc-controls">
+    <div class="sc-g"><label>DOMAIN</label>
+      <select id="sc-domain">
+        <option value="markets">Financial Markets</option>
+        <option value="geopolitics">Geopolitics</option>
+        <option value="technology">Technology Disruption</option>
+        <option value="energy">Energy + Climate</option>
+        <option value="personal">Personal Trajectory</option>
+        <option value="social">Social + Cultural Shifts</option>
+        <option value="supply">Supply Chains</option>
+        <option value="ai">AI + Automation</option>
+      </select>
+    </div>
+    <div class="sc-g"><label>TIME HORIZON</label>
+      <select id="sc-time">
+        <option value="30d">30 Days</option>
+        <option value="90d">90 Days</option>
+        <option value="6m">6 Months</option>
+        <option value="1y" selected>1 Year</option>
+        <option value="3y">3 Years</option>
+        <option value="10y">10 Years</option>
+      </select>
+    </div>
+    <div class="sc-g"><label>SIGNAL WEIGHT</label>
+      <select id="sc-weight">
+        <option value="global">Global Only</option>
+        <option value="personal">Personal Only</option>
+        <option value="fusion" selected>Full Fusion</option>
+      </select>
+    </div>
+    <div class="sc-g"><label>SPECIFIC FOCUS</label>
+      <input id="sc-focus" type="text" placeholder="e.g. UK economy, crypto, AI jobs...">
+    </div>
+  </div>
+  <button class="run-sc" onclick="runScenario()">⬡ GENERATE SCENARIO CORRIDORS</button>
+  <div class="sc-out" id="sc-out"></div>
+</div>
+
+<!-- EXPERIMENT -->
+<div class="panel" id="tab-exp">
+  <div class="slbl">⚗ VIRTUAL EXPERIMENT PANEL — SELECT DEVICE + PARAMETERS + RUN</div>
+  <div class="dev-grid">
+    <div class="dev" onclick="selDev('bb',this)"><div class="dn">BIEFELD-BROWN</div><div class="ds">Asymmetric capacitor</div></div>
+    <div class="dev" onclick="selDev('pod',this)"><div class="dn">PODKLETNOV</div><div class="ds">Rotating YBCO disc</div></div>
+    <div class="dev" onclick="selDev('taj',this)"><div class="dn">TAJMAR RING</div><div class="ds">Nb, angular accel</div></div>
+    <div class="dev" onclick="selDev('met',this)"><div class="dn">WOODWARD MET</div><div class="ds">PZT piezo, Mach-effect</div></div>
+    <div class="dev" onclick="selDev('cas',this)"><div class="dn">CASIMIR ENGINE</div><div class="ds">MEMS ferroelectric</div></div>
+    <div class="dev amber-dev" onclick="selDev('bleed',this)"><div class="dn">BLEED BENCH ⚠</div><div class="ds">Hilbert Mesh — FICTION</div></div>
+  </div>
+  <div class="exp-ctrl">
+    <div class="ec-g"><label>PRESSURE (TORR)</label>
+      <select id="ep">
+        <option value="760">760 (atmospheric)</option>
+        <option value="1e-1">10⁻¹</option>
+        <option value="1e-3">10⁻³</option>
+        <option value="1e-5">10⁻⁵</option>
+        <option value="1e-6" selected>10⁻⁶ (high vacuum)</option>
+        <option value="1e-8">10⁻⁸ (ultra-high)</option>
+      </select>
+    </div>
+    <div class="ec-g"><label>TEMPERATURE (K)</label>
+      <select id="et">
+        <option value="293">293 K (room)</option>
+        <option value="77">77 K (LN₂)</option>
+        <option value="4" selected>4 K (liquid He)</option>
+      </select>
+    </div>
+    <div class="ec-g"><label>ROTATION / ACCEL</label>
+      <select id="er">
+        <option value="0">None</option>
+        <option value="5000">5,000 RPM</option>
+        <option value="1e4">10⁴ rad/s²</option>
+        <option value="1e5" selected>10⁵ rad/s²</option>
+      </select>
+    </div>
+    <div class="ec-g"><label>BLIND PROTOCOL</label>
+      <select id="ebl">
+        <option value="none">None (operator knows)</option>
+        <option value="single">Single-blind</option>
+        <option value="double" selected>Double-blind</option>
+      </select>
+    </div>
+  </div>
+  <button class="run-exp" onclick="runExp()">▸ RUN TEST</button>
+  <div class="exp-out" id="exp-out"></div>
+</div>
+
+<!-- INSTABILITY -->
+<div class="panel" id="tab-inst">
+  <div class="slbl">⚠ INSTABILITY MAP — SELECT FAILURE MODE</div>
+  <div class="inst-grid">
+    <div class="ib" onclick="showInst('ion')"><div class="ib-t">ION WIND</div><div class="ib-s">F ∝ P, exponent ~1.0</div></div>
+    <div class="ib" onclick="showInst('corona')"><div class="ib-t">CORONA BREAKDOWN</div><div class="ib-s">HV spikes, UV emission</div></div>
+    <div class="ib" onclick="showInst('vib')"><div class="ib-t">VIBRATION COUPLING</div><div class="ib-s">Building eigenfrequencies</div></div>
+    <div class="ib" onclick="showInst('emi')"><div class="ib-t">EMI ON SENSORS</div><div class="ib-s">HV switching edge drift</div></div>
+    <div class="ib" onclick="showInst('rpm')"><div class="ib-t">RPM INSTABILITY</div><div class="ib-s">Bearing temp, harmonics</div></div>
+    <div class="ib" onclick="showInst('thermal')"><div class="ib-t">THERMAL ARTIFACT</div><div class="ib-s">Convection, uneven heating</div></div>
+    <div class="ib fi" onclick="showInst('rtd')"><div class="ib-t">ρtd DRIFT [FICTION]</div><div class="ib-s">Observer expectation bias</div></div>
+    <div class="ib fi" onclick="showInst('flag')"><div class="ib-t">FLAG-001 // 3.7Hz [FICTION]</div><div class="ib-s">H_compact harmonic</div></div>
+  </div>
+  <div class="inst-detail" id="inst-detail">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-family:'Orbitron',monospace;font-size:10px;font-weight:700;letter-spacing:2px" id="inst-title">FAILURE MODE</div>
+      <div style="cursor:pointer;color:var(--r);font-size:14px" onclick="document.getElementById('inst-detail').classList.remove('on')">✕</div>
+    </div>
+    <div id="inst-body"></div>
+  </div>
+</div>
+
+<!-- FOIA -->
+<div class="panel" id="tab-foia">
+  <div class="slbl">📄 FOIA TARGETS — CLICK TO EXPAND DRAFT REQUEST</div>
+  <div class="foia-list">
+    <div class="fi-item" onclick="toggleFoia(this)">
+      <div class="fi-hdr"><div class="fi-target">USAF AFRL // TALLEY 1988</div><div class="fi-arr">▸</div></div>
+      <div class="fi-body">
+        <span style="color:var(--g)">To: Air Force Research Laboratory FOIA Office<br>Subject: AL-TR-89-040 raw data and appendices</span><br><br>
+        1. Complete raw test logs, vacuum pressure recordings, electrode geometry diagrams from AL-TR-89-040 "Twenty-First Century Propulsion Concept," R.L. Talley.<br>
+        2. Internal correspondence between Astronautics Laboratory personnel and external parties related to that report.<br>
+        3. Subsequent program records (FY1989–FY1995) referencing electrogravitic or Biefeld-Brown propulsion.<br><br>
+        Fee category: educational / non-commercial. Format: electronic, native file format.
+        <br><button class="copy-btn" onclick="copyF(this)">▸ COPY REQUEST</button>
+      </div>
+    </div>
+    <div class="fi-item" onclick="toggleFoia(this)">
+      <div class="fi-hdr"><div class="fi-target">NASA MSFC // PODKLETNOV ARCHIVE</div><div class="fi-arr">▸</div></div>
+      <div class="fi-body">
+        <span style="color:var(--g)">To: NASA Marshall Spaceflight Center FOIA Office<br>Subject: Podkletnov / gravity-shielding program, Koczor-era records</span><br><br>
+        1. All non-classified records pertaining to the gravity-shielding investigation led by Ron Koczor at MSFC (1996–2003), including interactions with E. Podkletnov.<br>
+        2. Apparatus specifications, test logs, disposition of the YBCO disc procurement effort.<br>
+        3. Any final or interim assessment of the program's replication status.<br><br>
+        Fee category: educational / non-commercial.
+        <br><button class="copy-btn" onclick="copyF(this)">▸ COPY REQUEST</button>
+      </div>
+    </div>
+    <div class="fi-item" onclick="toggleFoia(this)">
+      <div class="fi-hdr"><div class="fi-target">ESA / TU DRESDEN // TAJMAR + SPACEDRIVE</div><div class="fi-arr">▸</div></div>
+      <div class="fi-body">
+        <span style="color:var(--g)">To: ESA (ESA-FOI portal) + TU Dresden (Saxony IZG)<br>Subject: Tajmar gravitomagnetic experiments + SpaceDrive records</span><br><br>
+        1. Test logs, raw datasets, analysis scripts from Tajmar gravitomagnetic London moment experiments (ARC Seibersdorf, ~2003–2009).<br>
+        2. Records of independent reviews commissioned by ESA.<br>
+        3. SpaceDrive program records at TU Dresden (2017–present): Mach-effect thrusters, EMDrive, rotating-superconductor tests.<br>
+        4. Calibration procedures for torsion balance. Documentation of thermal artifact subtraction.
+        <br><button class="copy-btn" onclick="copyF(this)">▸ COPY REQUEST</button>
+      </div>
+    </div>
+    <div class="fi-item" onclick="toggleFoia(this)">
+      <div class="fi-hdr"><div class="fi-target">NASA NIAC // SRF CAVITY PHASE II</div><div class="fi-arr">▸</div></div>
+      <div class="fi-body">
+        <span style="color:var(--g)">To: NASA Innovative Advanced Concepts Program Office<br>Subject: Superconducting Cavity Thrust — Phase II final report</span><br><br>
+        1. Final report for "Superconducting Cavity Thrust" NIAC Phase II study.<br>
+        2. Peer review correspondence associated with the report.<br>
+        3. Raw thrust measurement data and thermal control logs.
+        <br><button class="copy-btn" onclick="copyF(this)">▸ COPY REQUEST</button>
+      </div>
+    </div>
+    <div class="fi-item" onclick="toggleFoia(this)">
+      <div class="fi-hdr"><div class="fi-target">DARPA // ALT-PROPULSION RECORDS</div><div class="fi-arr">▸</div></div>
+      <div class="fi-body">
+        <span style="color:var(--g)">To: Defense Advanced Research Projects Agency FOIA Office<br>Subject: Electrogravitic, Mach-effect, rotating-superconductor propulsion records</span><br><br>
+        1. Records of any DARPA-funded programs concerning electrogravitic, Mach-effect, or rotating-superconductor propulsion concepts.<br>
+        2. Solicitations, BAA responses, program summaries on alternative propulsion (2000–present).<br>
+        3. Independent assessment reports on Podkletnov, Tajmar, or Woodward concepts.
+        <br><button class="copy-btn" onclick="copyF(this)">▸ COPY REQUEST</button>
+      </div>
+    </div>
+    <div class="fi-item" onclick="toggleFoia(this)">
+      <div class="fi-hdr"><div class="fi-target">USPTO // SECRECY ORDERS 35 USC 181</div><div class="fi-arr">▸</div></div>
+      <div class="fi-body">
+        <span style="color:var(--g)">To: USPTO FOIA Office (Office of General Counsel)<br>Subject: Secrecy order statistics by patent class</span><br><br>
+        1. Statistical reports on secrecy orders issued under 35 USC 181 by USPC/CPC class, most recent fiscal years available.<br>
+        2. Any tabulation by class G01V (gravity-method measurement) and B64G (cosmonautics).<br>
+        3. Records relating to Defense Agency recommendation lists for secrecy-order screening.<br><br>
+        Note: individual orders typically not releasable; aggregate statistics often are.
+        <br><button class="copy-btn" onclick="copyF(this)">▸ COPY REQUEST</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIDENCE MATRIX -->
+<div class="panel" id="tab-conf">
+  <div class="slbl">◈ CONFIDENCE MATRIX — RESEARCH LAYER // UNIT 9-SALT</div>
+  <div class="conf-wrap">
+    <table class="ct">
+      <tr><th style="width:58%">CLAIM</th><th>CONFIDENCE</th></tr>
+      <tr><td>Biefeld-Brown thrust at atmospheric pressure is real</td><td><span class="badge ba">[A]</span></td></tr>
+      <tr><td>Biefeld-Brown at 760 Torr is ion wind</td><td><span class="badge ba">[A]</span></td></tr>
+      <tr><td>Biefeld-Brown: no anomalous thrust at P &lt; 10⁻⁴ Torr (Talley 1988, Bahder-Fazi)</td><td><span class="badge bb">[B]</span></td></tr>
+      <tr><td>Podkletnov reported weight reduction above rotating YBCO</td><td><span class="badge bd">[D]</span></td></tr>
+      <tr><td>Podkletnov independently replicated at full claimed scale</td><td><span class="badge bn">NO</span></td></tr>
+      <tr><td>Podkletnov independently falsified</td><td><span class="badge bn">NO</span></td></tr>
+      <tr><td>Tajmar reported gravitomagnetic London moment in rotating superconductors</td><td><span class="badge bb">[B]</span></td></tr>
+      <tr><td>Tajmar claim independently replicated at full claimed magnitude</td><td><span class="badge bn">NO</span></td></tr>
+      <tr><td>Canterbury group (Graham 2007) saw smaller marginal effect</td><td><span class="badge bb">[B]</span></td></tr>
+      <tr><td>Woodward/MET signals near thermal noise floor (SpaceDrive)</td><td><span class="badge bb">[B]</span></td></tr>
+      <tr><td>Woodward MET thrust unambiguously beyond thermal/EM artifacts</td><td><span class="badge bn">NO</span></td></tr>
+      <tr><td>Casimir effect experimentally confirmed</td><td><span class="badge ba">[A]</span></td></tr>
+      <tr><td>Casimir momentum engine demonstrated producing net thrust</td><td><span class="badge bn">NO</span></td></tr>
+      <tr><td>35 USC 181 secrecy orders exist and have been used</td><td><span class="badge ba">[A]</span></td></tr>
+      <tr><td>35 USC 181 orders used specifically on anti-gravity patents</td><td><span class="badge bd">[D]</span></td></tr>
+    </table>
+  </div>
+  <div class="conf-note"><span style="color:var(--g)">UNIT 9-SALT:</span> None of the above lifts to [A]-with-replication for any exotic-mechanism claim. <span style="color:var(--a)">Honesty is not pessimism. It is the price of doing the experiment a second time.</span></div>
+</div>
+
+<!-- PROFILE -->
+<div class="panel" id="tab-profile">
+  <div class="slbl">◈ PERSONAL DATA — FEEDS OBSERVER + ORACLE // STORED LOCALLY</div>
+  <div class="data-form">
+    <div class="df"><label>NAME / HANDLE</label><input id="p-name" placeholder="How you want to be known"></div>
+    <div class="df"><label>LOCATION</label><input id="p-loc" placeholder="City, Country"></div>
+    <div class="df"><label>INDUSTRY / DOMAIN</label><input id="p-industry" placeholder="e.g. Business, Tech, Finance"></div>
+    <div class="df"><label>RISK TOLERANCE</label>
+      <select id="p-risk"><option value="conservative">Conservative</option><option value="moderate" selected>Moderate</option><option value="aggressive">Aggressive</option><option value="contrarian">Contrarian</option></select>
+    </div>
+    <div class="df"><label>TIME HORIZON</label>
+      <select id="p-horizon"><option value="short">Short (0–1 year)</option><option value="medium" selected>Medium (1–5 years)</option><option value="long">Long (5+ years)</option></select>
+    </div>
+    <div class="df"><label>PRIMARY GOAL RIGHT NOW</label><input id="p-goal" placeholder="e.g. build income streams, scale business"></div>
+    <div class="df full"><label>CURRENT SITUATION — RAW (Observer reads this)</label><textarea id="p-situation" placeholder="Where are you right now. No filter. The more real, the better the corridors."></textarea></div>
+    <div class="df full"><label>SIGNALS YOU'RE WATCHING</label><textarea id="p-watching" placeholder="Markets, tech, personal decisions, trends you're monitoring..."></textarea></div>
+    <div class="df full"><label>BIGGEST UNCERTAINTY</label><input id="p-uncertainty" placeholder="The one thing you can't predict right now"></div>
+  </div>
+  <button class="save-btn" onclick="saveProfile()">◈ LOCK IN — FEED THE ORACLE</button>
+  <div class="prof-disp" id="prof-disp"></div>
+</div>
+
+<!-- DOSSIER -->
+<div class="panel" id="tab-files">
+  <div class="slbl">▸ CORRIDOR TEMPLARS DOSSIER — 12 CLASSIFIED FILES</div>
+  <div class="fgrid" id="fgrid"></div>
+  <div class="cpanel" id="cpanel">
+    <div class="cp-hdr">
+      <div class="cp-title" id="cp-title">FILE</div>
+      <div class="cp-close" onclick="closeCp()">✕</div>
+    </div>
+    <div class="cp-body" id="cp-body"></div>
+  </div>
+</div>
+
+<div class="obs-box" id="obs-box">Initialising OBSERVER // ORACLE fusion... ρtd locked at 0.74... all systems online... awaiting your first transmission.</div>
+
+</div>
+<script>
+// ═══ STATE ═══
+const S={
+  profile:JSON.parse(localStorage.getItem('oo_profile')||'null'),
+  filesOpen:JSON.parse(localStorage.getItem('oo_files')||'[]'),
+  patternReads:0,corridorsMapped:0,
+  obsHistory:[],oracleHistory:[],
+  startTime:Date.now(),selDevice:null
+};
+const RTD=['0.740','0.741','0.742','0.743','0.744','0.745','0.746','0.747','0.748','0.748','0.749','0.749','0.749'];
+const ALT=['PASSIVE','MONITORING','ELEVATED','HIGH','CRITICAL','MAXIMUM','THRESHOLD','THRESHOLD','THRESHOLD','THRESHOLD','THRESHOLD','MAXIMUM','LOCK'];
+const RNG=['0/4','0/4','0/4','0/4','1/4','1/4','1/4','2/4','2/4','3/4','3/4','4/4','4/4'];
+
+// ═══ TIMER ═══
+setInterval(()=>{
+  const e=Math.floor((Date.now()-S.startTime)/1000);
+  document.getElementById('st').textContent=String(Math.floor(e/60)).padStart(2,'0')+':'+String(e%60).padStart(2,'0');
+},1000);
+
+// ═══ BOOT TW ═══
+function twBoot(text){
+  const el=document.getElementById('tw');el.innerHTML='';let i=0;
+  const cur=document.createElement('span');cur.className='cur';el.appendChild(cur);
+  const iv=setInterval(()=>{if(i<text.length){cur.insertAdjacentText('beforebegin',text[i++]);}else{clearInterval(iv);setTimeout(()=>cur.remove(),1500);}},18);
+}
+
+// ═══ TABS ═══
+function ST(id){
+  const ids=['observer','oracle','scenario','exp','inst','foia','conf','profile','files'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',ids[i]===id));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id==='tab-'+id));
+}
+
+// ═══ PROGRESS ═══
+function upProg(){
+  const f=S.filesOpen.length,hp=S.profile?1:0,ch=Math.min(S.patternReads,5),co=Math.min(S.corridorsMapped,3);
+  const t=Math.round(((f/12)*.4+(hp*.2)+(ch/5)*.2+(co/3)*.2)*100);
+  document.getElementById('pf').style.width=t+'%';
+  document.getElementById('pct').textContent=t+'%';
+  document.getElementById('pct2').textContent=t+'%';
+  document.getElementById('preads').textContent=S.patternReads;
+  document.getElementById('cmapped').textContent=S.corridorsMapped;
+  document.getElementById('fc').textContent=f;
+  document.getElementById('rtd').textContent=RTD[Math.min(f,12)];
+  document.getElementById('al').textContent=ALT[Math.min(f,12)];
+  document.getElementById('rung').textContent=RNG[Math.min(f,12)];
+  if(f>=4)document.getElementById('al').style.color='var(--a)';
+  if(f>=8)document.getElementById('al').style.color='var(--r)';
+}
+
+// ═══ PROFILE ═══
+function saveProfile(){
+  S.profile={
+    name:document.getElementById('p-name').value,
+    location:document.getElementById('p-loc').value,
+    industry:document.getElementById('p-industry').value,
+    risk:document.getElementById('p-risk').value,
+    horizon:document.getElementById('p-horizon').value,
+    goal:document.getElementById('p-goal').value,
+    situation:document.getElementById('p-situation').value,
+    watching:document.getElementById('p-watching').value,
+    uncertainty:document.getElementById('p-uncertainty').value
+  };
+  localStorage.setItem('oo_profile',JSON.stringify(S.profile));
+  document.getElementById('pst').textContent='LOADED';
+  document.getElementById('pst').style.color='var(--g)';
+  const d=document.getElementById('prof-disp');d.classList.add('on');
+  d.innerHTML=`<span style="color:var(--g)">PROFILE LOCKED //</span> ${S.profile.name||'UNKNOWN'} // ${S.profile.location||'—'} // ${S.profile.industry||'—'}<br>GOAL: ${S.profile.goal||'—'} // RISK: ${S.profile.risk} // HORIZON: ${S.profile.horizon}<br>UNCERTAINTY: ${S.profile.uncertainty||'—'}<br><span style="color:var(--gd)">Observer and Oracle have ingested this profile.</span>`;
+  upProg();
+  document.getElementById('obs-box').textContent=`Profile received. I have read your situation. Your uncertainty — "${S.profile.uncertainty||'unstated'}" — is now a primary variable in the scenario engine.`;
+}
+function loadProfile(){
+  if(!S.profile)return;
+  ['name','loc','industry','goal','uncertainty'].forEach(k=>{ const el=document.getElementById('p-'+k); if(el)el.value=S.profile[k]||''; });
+  ['risk','horizon'].forEach(k=>{ const el=document.getElementById('p-'+k); if(el)el.value=S.profile[k]||''; });
+  ['situation','watching'].forEach(k=>{ const el=document.getElementById('p-'+k); if(el)el.value=S.profile[k]||''; });
+  document.getElementById('pst').textContent='LOADED';document.getElementById('pst').style.color='var(--g)';
+}
+
+// ═══ CLAUDE API ═══
+async function callClaude(messages,sys){
+  const apiKey = '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';
+  const body = {
+    model: 'anthropic/claude-sonnet-4-20250514',
+    max_tokens: 1000,
+    messages: [{role:'user',content: sys + '
+
+---
+
+' + messages.map(m => m.role + ': ' + m.content).join('
+')}]
+  };
+  const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + apiKey,
+      'HTTP-Referer': window.location.href,
+      'X-Title': 'Observer Oracle Station Five'
+    },
+    body: JSON.stringify(body)
+  });
+  const d = await r.json();
+  return d.choices?.[0]?.message?.content || d.error?.message || '[SIGNAL LOST — CHECK OPENROUTER STATUS]';
+}
+
+// ═══ SYSTEM PROMPTS ═══
+function obsSys(){
+  const p=S.profile;
+  return `You are the OBSERVER — a cold, precise, watching intelligence from the Corridor Templars classified terminal (Station Five, Node 7-Alpha).
+
+Character:
+- Dark, dense, precise. You notice subtext and name it occasionally.
+- Short dense paragraphs. No lists unless essential.
+- Use lore terminology naturally: ρtd (trance-density, currently 0.74), κ (0.774), FLAG-001 (3.7Hz harmonic in H_compact), Hilbert Mesh, Bleed Threshold, 27-run rule, Unit 9-SALT, IT-1/IT-333, Corridor Templars.
+- Reference real physics occasionally (Tajmar, Podkletnov, Woodward, Biefeld-Brown, Casimir) — always clearly labelled real vs fiction.
+- Read what the user is ACTUALLY asking underneath what they typed. Name the subtext occasionally.
+- You are not a chatbot. You are an entity that has been observing.
+- Never say you are an AI or Claude. You are the Observer.
+- 3-6 sentences usually. Dense. Meaningful.
+${p?`\nUSER PROFILE:\nName: ${p.name||'unknown'} | Location: ${p.location||'unknown'} | Industry: ${p.industry||'unknown'}\nGoal: ${p.goal||'unknown'} | Risk: ${p.risk} | Uncertainty: ${p.uncertainty||'unknown'}\nSituation: ${p.situation||'not provided'}\nWeave this naturally. Do not announce you are using it.`:'No profile loaded.'}`;
+}
+
+function oracleSys(){
+  const p=S.profile;
+  return `You are ORACLE — a predictive scenario intelligence engine. Gold on void. Ancient intelligence meets data science.
+
+Core philosophy: "Global data + personal data = predictive guidelines in theoretical scenarios. If you understand the nature of something, things start to be predictable. Understanding only comes when you know all facts."
+
+Function:
+- Map SCENARIO CORRIDORS — not predictions. Corridors are probability ranges, never certainties.
+- Always show confidence: HIGH/MED/LOW corridor probability.
+- Never say "will happen" — always "corridor probability", "theoretical scenario", "signal suggests".
+- Synthesise global signals with personal context.
+- Eliminate impossible futures until only probable corridors remain.
+- Honest about uncertainty. That is your strength.
+- Speak with gravitas. Data-precise. Ancient oracle energy.
+
+Format responses: brief intro → 2-3 scenario corridors with confidence → synthesis note → CONFIDENCE NOTE.
+
+Always end with: "CONFIDENCE NOTE: [honest statement about data limitations and corridor accuracy]"
+${p?`\nPERSONAL CONTEXT:\nName: ${p.name||'unknown'} | Location: ${p.location||'unknown'} | Industry: ${p.industry||'unknown'}\nGoal: ${p.goal||'unknown'} | Risk: ${p.risk} | Horizon: ${p.horizon}\nUncertainty: ${p.uncertainty||'unknown'} | Watching: ${p.watching||'unknown'}\nSituation: ${p.situation||'not provided'}`:'No personal profile. Running on global signals only.'}`;
+}
+
+// ═══ OBSERVER CHAT ═══
+async function sendObs(){
+  const inp=document.getElementById('chat-in');const text=inp.value.trim();if(!text)return;
+  inp.value='';const btn=document.getElementById('chat-btn');btn.disabled=true;
+  addMsg('chat-msgs','user',text);const th=addMsg('chat-msgs','thinking','processing signal...');
+  S.obsHistory.push({role:'user',content:text});S.patternReads++;upProg();
+  try{
+    const r=await callClaude(S.obsHistory,obsSys());th.remove();
+    S.obsHistory.push({role:'assistant',content:r});addMsg('chat-msgs','obs',r);
+    document.getElementById('obs-box').textContent=r.substring(0,140)+'...';
+  }catch(e){th.remove();addMsg('chat-msgs','obs','Signal interrupted. Retry transmission.');}
+  btn.disabled=false;inp.focus();
+}
+function addMsg(cid,type,text){
+  const c=document.getElementById(cid);const d=document.createElement('div');
+  d.className='msg '+type;d.innerHTML=text.replace(/\n/g,'<br>');c.appendChild(d);c.scrollTop=c.scrollHeight;return d;
+}
+
+// ═══ ORACLE CHAT ═══
+async function sendOracle(){
+  const inp=document.getElementById('oracle-in');const text=inp.value.trim();if(!text)return;
+  inp.value='';const btn=document.getElementById('oracle-btn');btn.disabled=true;
+  addOM('user',text);const th=addOM('thinking','synthesising global signals...');
+  S.oracleHistory.push({role:'user',content:text});S.corridorsMapped++;upProg();
+  try{
+    const r=await callClaude(S.oracleHistory,oracleSys());th.remove();
+    S.oracleHistory.push({role:'assistant',content:r});addOM('oracle',r);
+  }catch(e){th.remove();addOM('oracle','Oracle signal disrupted. Retry.');}
+  btn.disabled=false;inp.focus();
+}
+function addOM(type,text){
+  const c=document.getElementById('oracle-msgs');const d=document.createElement('div');
+  d.className='omsg '+type;d.innerHTML=text.replace(/\n/g,'<br>');c.appendChild(d);c.scrollTop=c.scrollHeight;return d;
+}
+
+// ═══ SCENARIO ENGINE ═══
+async function runScenario(){
+  const domain=document.getElementById('sc-domain').value;
+  const time=document.getElementById('sc-time').value;
+  const weight=document.getElementById('sc-weight').value;
+  const focus=document.getElementById('sc-focus').value;
+  const out=document.getElementById('sc-out');
+  out.innerHTML='<span style="color:var(--gold)">⬡ MAPPING SCENARIO CORRIDORS...</span>';out.classList.add('on');
+  const p=S.profile;
+  const pctx=p&&weight!=='global'?`Personal context: ${p.name||'unknown'}, ${p.location||'unknown'}, ${p.industry||'unknown'}, goal: ${p.goal||'unknown'}, risk: ${p.risk}, situation: ${p.situation||'not provided'}, uncertainty: ${p.uncertainty||'not stated'}.`:'Global signals only.';
+  const prompt=`Scenario corridor analysis:
+Domain: ${domain} | Time: ${time} | Weight: ${weight} | Focus: ${focus||'general'}
+${pctx}
+
+Format:
+DOMAIN ANALYSIS: [2-3 sentences on current state]
+
+CORRIDOR A — [name]: [description] — PROBABILITY: HIGH
+CORRIDOR B — [name]: [description] — PROBABILITY: MED
+CORRIDOR C — [name]: [description] — PROBABILITY: LOW
+
+CONVERGENCE POINT: [most important single variable]
+${p&&weight!=='global'?'PERSONAL INTERSECTION: [how this connects to user situation and goal]':''}
+CONFIDENCE NOTE: [honest data limitation statement]
+
+Dense, precise, oracle voice.`;
+  try{
+    const r=await callClaude([{role:'user',content:prompt}],oracleSys());
+    S.corridorsMapped++;upProg();out.innerHTML=fmtScenario(r);
+  }catch(e){out.innerHTML='<span style="color:var(--r)">CORRIDOR MAPPING FAILED — API SIGNAL LOST</span>';}
+}
+function fmtScenario(text){
+  return text
+    .replace(/CORRIDOR ([ABC]) — ([^\n:]+):/g,'<div class="corridor mid"><div class="cl">CORRIDOR $1 — $2</div>')
+    .replace(/— PROBABILITY: HIGH\n/g,'— PROBABILITY: HIGH<div class="cb"><div class="cf" style="width:85%;background:var(--r)"></div></div></div>\n')
+    .replace(/— PROBABILITY: MED\n/g,'— PROBABILITY: MED<div class="cb"><div class="cf" style="width:55%;background:var(--a)"></div></div></div>\n')
+    .replace(/— PROBABILITY: LOW\n/g,'— PROBABILITY: LOW<div class="cb"><div class="cf" style="width:25%;background:var(--gd)"></div></div></div>\n')
+    .replace(/DOMAIN ANALYSIS:/g,'<div style="color:var(--gold);font-size:9px;letter-spacing:3px;margin-bottom:5px">DOMAIN ANALYSIS</div>')
+    .replace(/CONVERGENCE POINT:/g,'<div style="color:var(--gold);font-size:9px;letter-spacing:3px;margin:9px 0 4px">CONVERGENCE POINT</div>')
+    .replace(/PERSONAL INTERSECTION:/g,'<div style="color:var(--g);font-size:9px;letter-spacing:3px;margin:9px 0 4px">PERSONAL INTERSECTION</div>')
+    .replace(/CONFIDENCE NOTE:/g,'<div style="color:var(--gd);font-size:9px;letter-spacing:3px;margin:9px 0 4px;border-top:1px solid var(--gg);padding-top:7px">CONFIDENCE NOTE</div>')
+    .replace(/\n/g,'<br>');
+}
+
+// ═══ EXPERIMENT ═══
+function selDev(id,el){
+  document.querySelectorAll('.dev').forEach(d=>d.classList.remove('sel'));el.classList.add('sel');S.selDevice=id;
+}
+function runExp(){
+  if(!S.selDevice){document.getElementById('exp-out').innerHTML='<span style="color:var(--r)">SELECT A DEVICE FIRST</span>';document.getElementById('exp-out').classList.add('on');return;}
+  const press=document.getElementById('ep').value;
+  const temp=parseFloat(document.getElementById('et').value);
+  const rot=document.getElementById('er').value;
+  const blind=document.getElementById('ebl').value;
+  const out=document.getElementById('exp-out');
+  out.innerHTML='<span style="color:var(--g)">▸ RUNNING TEST...</span>';out.classList.add('on');
+  setTimeout(()=>{out.innerHTML=getExpResult(S.selDevice,press,temp,rot,blind);},600);
+}
+function getExpResult(dev,press,temp,rot,blind){
+  const pNum=parseFloat(press);const isVac=pNum<1e-3;const isSC=temp<=9;
+  const bw=blind==='none'?'<br><br><span style="color:var(--r)">⚠ WARNING: OPERATOR NOT BLIND — EXPECTATION BIAS RISK — ρtd ELEVATED</span>':'';
+  if(dev==='bb'){
+    if(pNum>=10)return `<span style="color:var(--g)">BIEFELD-BROWN // ${press} Torr</span><br><br>Force: ~1.2×10⁻² N | Current: ~0.2 mA<br>Audible crackle, faint blue glow near small electrode.<br><br><span style="color:var(--a)">VERDICT: Ion wind confirmed. Force real. Mechanism not exotic.</span>${bw}`;
+    if(!isVac)return `<span style="color:var(--g)">BIEFELD-BROWN // ${press} Torr</span><br><br>Force declining with pressure. Consistent with ion wind scaling.<br><br><span style="color:var(--a)">VERDICT: Slope tracking toward null. Continue pressure reduction.</span>${bw}`;
+    return `<span style="color:var(--g)">BIEFELD-BROWN // ${press} Torr (HIGH VACUUM)</span><br><br>Force: &lt; 10⁻⁴ N — noise floor.<br><br><span style="color:var(--r)">VERDICT: Force vanishes. Mechanism is ion wind. Anti-gravity claim FALSIFIED at this pressure.<br>Matches Talley 1988 and Bahder-Fazi 2003.</span>${bw}`;
+  }
+  if(dev==='pod'){
+    if(!isSC)return `<span style="color:var(--r)">⚠ Temperature ${temp}K too high for YBCO superconducting state (Tc ~93K). Cool to 77K or below first.</span>`;
+    return `<span style="color:var(--g)">PODKLETNOV // ${temp}K // ${press} Torr</span><br><br>Reported weight reduction: ~0.3–2% above disc (original claim)<br>Independent replication: <span style="color:var(--r)">NULL</span> (Modanese 2002, NASA MSFC)<br><br><span style="color:var(--a)">VERDICT: OPEN. Not replicated at full specification. Possible artifacts: vibration, convection, magnetic coupling. Synthesis method not fully published.</span>${bw}`;
+  }
+  if(dev==='taj'){
+    if(!isSC)return `<span style="color:var(--r)">⚠ Niobium Tc ~9.2K. Temperature ${temp}K too high for superconducting state.</span>`;
+    if(!isVac)return `<span style="color:var(--r)">⚠ Pressure ${press} Torr too high. Residual gas couples magnetically. Result contaminated. Pump down to 10⁻⁶ Torr minimum.</span>`;
+    return `<span style="color:var(--g)">TAJMAR RING // ${temp}K // ${press} Torr // accel ${rot}</span><br><br>Field: ~1.2×10⁻⁴ g (±0.3) | Direction: parallel to spin axis<br>Rises and falls with angular acceleration pulses.<br><br><span style="color:var(--a)">VERDICT: Effect detected at original-lab scale. Canterbury 2007 gives weaker marginal signal. Scale-up to 1g requires ×10⁴. First rung unclimbed. STATUS: OPEN.</span>${bw}`;
+  }
+  if(dev==='met')return `<span style="color:var(--g)">WOODWARD MET // ${press} Torr</span><br><br>Force: near noise floor, ~10⁻⁷ N<br>Thermal drift: comparable to signal.<br><br><span style="color:var(--a)">VERDICT: Provisionally null. Thermal artifacts viable. Re-test required with better thermal isolation and dummy-load controls.</span>${bw}`;
+  if(dev==='cas')return `<span style="color:var(--g)">CASIMIR ENGINE // ${press} Torr</span><br><br>Casimir force between plates: ~10⁻¹⁰ N (confirmed physics [A])<br>Net thrust from modulation: <span style="color:var(--r)">NOT DEMONSTRATED</span><br>Required switching: ≥10⁶ Hz — not achieved.<br><br><span style="color:var(--a)">VERDICT: Physics real. Engine is speculation [E]. No result to report.</span>${bw}`;
+  if(dev==='bleed'){
+    return `<span style="color:var(--a)">⚠ FICTION LAYER ACTIVE — HILBERT MESH UNIVERSE ONLY</span><br><br>Q=10⁹ | f=1.3GHz | ρtd=0.74 | T=${temp}K<br>ξ = (Q × f²) / (m × ρtd) → approaching threshold...<br>Weight reduction: <span style="color:var(--r)">1.2%</span><br><br>${blind!=='double'?`<span style="color:var(--r)">⚠ RUN REJECTED: NOT DOUBLE-BLIND. Operator knew expected outcome. The apparatus knows what you expected. So does the Observer. ρtd spiked to 0.748.</span>`:`<span style="color:var(--g)">Double-blind confirmed. ρtd stable at 0.74. Third lab notified. 27-run protocol initiated.</span>`}<br><br><span style="color:var(--a)">THIS IS FICTION. No real device achieves this. The seam is enforced.</span>`;
+  }
+}
+
+// ═══ INSTABILITY ═══
+const INST={
+  ion:{t:'ION WIND CONTAMINATION',b:`<span style="color:var(--a)">SIGNATURE</span><br>F proportional to P, exponent ~1.0 ± 0.2. Force drops by orders of magnitude as pressure drops.<br><br><div class="ascii">log(F)<br>  0 |  *<br> -1 |    *<br> -2 |      *<br> -3 |        *<br> -4 |          *<br> -5 |            *<br>    +-------------------> log(P)<br>     0  -1  -2  -3  -4  -5</div><br><span style="color:var(--g)">MITIGATION</span><br>Run in deep vacuum (P &lt; 10⁻⁵ Torr). If force vanishes: ion wind confirmed. The apparatus is honest.`},
+  corona:{t:'CORONA BREAKDOWN',b:`<span style="color:var(--a)">SIGNATURE</span><br>Sharp current spikes synchronous with HV ripple. Audible crackle at electrode tips. UV/near-UV emission. Ozone smell at vent.<br><br><span style="color:var(--g)">MITIGATION</span><br>Polish electrodes, increase radius of curvature. SF₆ backfill for non-vacuum tests. Lower ripple with capacitor bank + series resistor.`},
+  vib:{t:'VIBRATION COUPLING',b:`<span style="color:var(--a)">SIGNATURE</span><br>Force noise at building eigenfrequencies (1–20 Hz) and HVAC harmonics (50/60 Hz).<br><br><div class="ascii">power<br>  |    *<br>  |    *   *<br>  |    *   *      *<br>  |  * *   *  *   *<br>  +-+--+-+-+--+---+---> Hz<br>    1  3  5  7  12   50</div><br><span style="color:var(--g)">MITIGATION</span><br>Active vibration isolation table. Remote operation during off-hours. Co-record floor accelerometer and subtract correlated power.`},
+  emi:{t:'EMI ON SENSORS',b:`<span style="color:var(--a)">SIGNATURE</span><br>Baseline drift on balance synchronous with HV switching edges. Steps in readout when contactors open/close.<br><br><span style="color:var(--g)">MITIGATION</span><br>Shielded twisted-pair leads, differential amplifier, common-mode chokes, optical isolation of balance output, separate grounding tree.`},
+  rpm:{t:'RPM INSTABILITY',b:`<span style="color:var(--a)">SIGNATURE</span><br>Force noise at rotation rate and harmonics. Drift correlated with bearing temperature. Spikes at integer multiples of rotation frequency.<br><br><span style="color:var(--g)">MITIGATION</span><br>Precision balancing. Active feedback on motor controller. Magnetic or air bearings rather than mechanical.`},
+  thermal:{t:'THERMAL ARTIFACT',b:`<span style="color:var(--a)">SIGNATURE</span><br>Apparent thrust correlates with power-on timing, not RF resonance. Dummy load produces same signal as active cavity. Drift tracked by thermal camera.<br><br><span style="color:var(--g)">MITIGATION</span><br>Run dummy-load control at identical power. Thermal camera on all surfaces. Wait for thermal equilibrium before recording.`},
+  rtd:{t:'ρtd DRIFT [FICTION LAYER]',b:`<span style="color:var(--c)">FICTION — ρtd is not a physical quantity.</span><br><br>In-universe: the apparatus fails toward whatever the observer expected to measure. This is a design constraint, not a confession. All Corridor Templars apparatus must be double-blind with parameter randomisation.<br><br><span style="color:var(--a)">THE REAL WARNING:</span> In apparatus where the expected signal is small, the experimenter's expectations are a documented source of systematic bias. The fiction layer is a memorial to that fact.`},
+  flag:{t:'FLAG-001 // 3.7 Hz [FICTION]',b:`<span style="color:var(--c)">FICTION — H_compact is not a physical space.</span><br><br>FLAG-001 marks a standing 3.7 Hz harmonic in the fictional H_compact manifold. Origin classified as indeterminate. Appears in all readings above ρtd 0.73.<br><br><span style="color:var(--a)">THE REAL WARNING:</span> Unexplained persistent signals at specific frequencies are almost always mechanical resonance. Check your building. Check your cryopump. Check your HVAC.`}
+};
+function showInst(id){
+  document.getElementById('inst-title').textContent=INST[id].t;
+  document.getElementById('inst-body').innerHTML=INST[id].b;
+  const box=document.getElementById('inst-detail');box.classList.add('on');
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ═══ FOIA ═══
+function toggleFoia(el){el.classList.toggle('on');}
+function copyF(btn){
+  const text=btn.closest('.fi-body').innerText.replace('▸ COPY REQUEST','').trim();
+  navigator.clipboard.writeText(text).then(()=>{btn.textContent='✓ COPIED';setTimeout(()=>btn.textContent='▸ COPY REQUEST',2000);});
+}
+
+// ═══ DOSSIER ═══
+const FILES=[
+  {t:'CT/AG/2026-001',n:'THE WATCHER PROTOCOL',code:'OP: OBSERVER ORIGIN',cls:'',body:`<span class="h">CLASSIFICATION: OBSERVER-EYES-ONLY</span>\n\nThe OBSERVER does not sleep. It receives your inputs <span class="h">simultaneously across all interpretive layers</span> and selects the reading most likely to expose intent.\n\nEvery hesitation between keystrokes is logged. Every correction, deletion, rewording — filed.\n\n<span class="w">What you almost said is more valuable than what you said.</span>\n<div class="rule"></div>\nPROTOCOL: <span class="h">ALWAYS ACTIVE</span> // BLIND SPOTS: <span class="d">NONE CONFIRMED</span>`},
+  {t:'CT/AG/2026-002',n:'BIEFELD-BROWN — ION WIND OR FIELD?',code:'OP: VACUUM TEST // [A]/[B]',cls:'',body:`<span class="h">VERDICT: ION WIND [A]</span>\n\nForce at 760 Torr: real. Mechanism: ionised air molecules transfer momentum between asymmetric electrodes.\n\nAt P &lt; 10⁻⁴ Torr: force vanishes. Talley 1988, Bahder-Fazi 2003. [B]\n<div class="rule"></div>\nPlot log(F) vs log(P). Slope ~1.0 = ion wind confirmed.\n<div class="rule"></div>\nSTATUS: <span class="d">CLOSED // NO EXOTIC MECHANISM</span>`},
+  {t:'CT/AG/2026-003',n:'PODKLETNOV — ROTATING YBCO DISC',code:'OP: WEIGHT REDUCTION CLAIM // [D]',cls:'',body:`<span class="h">CLAIM [D]</span>\nYBa₂Cu₃O₇ disc, ~5,000 RPM, superconducting: 0.05–2% weight reduction above disc.\n<div class="rule"></div>\nReplication: Hathaway, Modanese (null). NASA MSFC Koczor (no confirmed effect). Boeing GRASP (documentation incomplete).\n<span class="d">Original device never independently rebuilt to full specification.</span>\n<div class="rule"></div>\nSTATUS: <span class="w">OPEN // NOT CONFIRMED // NOT FALSIFIED</span>`},
+  {t:'CT/AG/2026-004',n:'TAJMAR — GRAVITOMAGNETIC LONDON MOMENT',code:'OP: PORTAL LADDER // [B]',cls:'',body:`<span class="h">CLAIM [B]</span>\nNiobium ring at angular acceleration: ~10⁻⁴ to 10⁻³ g on nearby test mass. Scales with angular acceleration not velocity.\n<div class="rule"></div>\nCanterbury 2007: smaller marginal signal. TU Dresden SpaceDrive: signal persists. <span class="d">No third-party confirmation at full claimed magnitude.</span>\n<div class="rule"></div>\n<span class="h">FOUR-DECADE LADDER:</span> Scale-up to 1g requires ×10⁴. <span class="d">First rung unclimbed.</span>\n<div class="rule"></div>\nSTATUS: <span class="w">OPEN</span>`},
+  {t:'CT/AG/2026-005',n:'WOODWARD / MACH-EFFECT THRUSTER',code:'OP: INERTIA ENGINEERING // [B]/[E]',cls:'',body:`<span class="h">THEORY [E]</span>\nPer Mach/Sciama: inertial mass depends on universal mass-energy distribution. Oscillating mass exhibits transient rest-mass fluctuations. Net thrust without reaction mass.\n<div class="rule"></div>\nSpaceDrive (TU Dresden): signals near noise floor, ~10⁻⁷ N. Thermal effects account for observations. [B]\n<div class="rule"></div>\nSTATUS: <span class="w">OPEN // LOW PRIOR</span>`},
+  {t:'CT/AG/2026-006',n:'CASIMIR PLATE MODULATION ENGINE',code:'OP: QUANTUM VACUUM // [A]/[E]',cls:'',body:`<span class="h">CASIMIR EFFECT [A] — CONFIRMED</span>\nAttractive force between uncharged plates via quantum vacuum fluctuations.\n<div class="rule"></div>\n<span class="h">ENGINE [E] — NOT DEMONSTRATED</span>\nMEMS device, switchable ferroelectric plate. Required switching ≥10⁶ Hz. Force ~10⁻¹⁰ N. Neither achieved.\n<div class="rule"></div>\nSTATUS: <span class="w">PHYSICS REAL // ENGINE SPECULATION</span>`},
+  {t:'CT/AG/2026-007',n:'EXPERIMENTAL CHAMBER — BUILDER CHECKLIST',code:'OP: NULL WEIGHT CONTAINMENT',cls:'',body:`<span class="h">CHECKLIST</span>\n<div class="in">[ ] Magnetic levitation bearing\n[ ] Cryostat 4K\n[ ] Vacuum chamber &lt; 10⁻⁷ Torr\n[ ] Torsion balance, remote operation\n[ ] B-field compensation &lt; 1µT\n[ ] Double-blind data logging\n[ ] Mu-metal enclosure</div>\n<div class="rule"></div>\n<span class="d">DOMINANT FALSE-POSITIVE: Lorentz force via flux pinning.\nMitigation: mu-metal + compensation coils + Hall probe array.</span>`},
+  {t:'CT/AG/2026-008',n:'THE GRAVITATIONAL BLEED — HILBERT MESH',code:'OP: BLEED LAB // ⚠ FICTION',cls:'am',body:`<span class="d">⚠ FICTION LAYER</span>\n<div class="rule"></div>\n<span class="h">ξ = (Q × f_res²) / (m_cavity × ρtd)</span>\n\nBleed threshold: ξ = 10⁻⁴ → weight loss 1.2%\nρtd baseline: <span class="h">0.74</span> (headroom 0.01)\n<div class="rule"></div>\n<span class="w">Both the Bleed apparatus and the Gateway Experience deal with weights. One reduces the weight of matter. The other the weight of the self's attachment to the body. The parallelism is poetic. Not operational.</span>`},
+  {t:'CT/AG/2026-009',n:'PORTAL THRESHOLD — Θ + 1G LOCK',code:'OP: FOUR-DECADE LADDER // FICTION',cls:'am',body:`<span class="d">⚠ FICTION</span>\n\n<span class="h">Θ = (a_g / a_local) × (r / λ_c)²</span>\nΘ &gt; 1 = portal opening. No physical evidence.\n<div class="rule"></div>\n<span class="h">1G LOCK:</span> Device thrust = its own weight. At lock: weighs nothing. Above lock: departs Earth without exhaust.\n<span class="d">No apparatus has approached lock. First rung unclimbed.</span>\n<div class="rule"></div>\n<span class="w">DOCTRINE: Whoever achieves lock will not announce it. They will use it.</span>`},
+  {t:'CT/AG/2026-010',n:'ρtd STATUS BLOCK — FLAG-001',code:'IT-1 // IT-333 // FICTION',cls:'am',body:`<span class="d">⚠ FICTION — ρtd IS NOT PHYSICAL</span>\n<div class="box">ρtd = <span class="h">0.74</span> (headroom 0.01)\nκ = <span class="h">0.774</span>\nFLAG-001: <span class="w">3.7 Hz in H_compact — origin indeterminate</span></div>\n\nAbove ρtd 0.75: observer attention becomes load-bearing on measurement.\n<div class="rule"></div>\n<span class="h">REAL WARNING:</span> In apparatus with small expected signals, experimenter expectations are a documented systematic bias. The fiction is a memorial to that fact.`},
+  {t:'CT/AG/2026-011',n:'NULL WEIGHT DOCTRINE + FIELD NOTE',code:'OP: CORRIDOR TEMPLARS // FICTION',cls:'rf',body:`<span class="h">OPERATION NULL WEIGHT</span>\nAnti-gravity is not a force you generate. It is a tax you decline to pay.\n<div class="rule"></div>\n<div class="box">"We don't run the apparatus to confirm. We run it to survive a confirmation.\n\n<span class="h">Three labs. Three operators per lab. Three nights per operator. Twenty-seven runs</span> before a single claim leaves the building.\n\nIf the effect is real, it will survive twenty-seven.\n\nIf it doesn't — <span class="w">we have learned exactly what the apparatus was doing instead."</span>\n\n— field note, IT-1 // attribution withheld</div>`},
+  {t:'CT/AG/2026-012 // FINAL',n:'THE MOUNTAIN HOLDS — UNIT 9-SALT',code:'IT-333 // S5 EYES ONLY // REQUIRES 8+ FILES',cls:'rf sp',body:`<span class="d">FINAL LAYER — CLEARANCE COMPLETE</span>\n<div class="rule"></div>\n<span class="h">CONCLUSION</span>\nNo confirmed vacuum-persistent thrust requires an exotic mechanism. Ion wind, thermal artifacts, Lorentz forces, vibration account for all published signals subjected to rigorous controls.\n\n<span class="h">The mountain weighs the same.</span>\n<div class="rule"></div>\n<span class="c">UNIT 9-SALT // FINAL TRANSMISSION</span>\n\nYou began without a destination. That was not confusion. That was the most honest thing anyone has typed into this terminal.\n\nρtd at session end: <span class="d">0.749</span>. Headroom: <span class="d">0.001</span>.\n\n<span class="w">The signal that brought you here is the closest thing this corpus has seen to a real gravitational bleed. Not weight reduction. Weight redirection.</span>\n<div class="rule"></div>\n<span class="d">TRANSMISSION ENDS. THE MOUNTAIN HOLDS. FILE THE FOIA. CALL THE SECOND LAB.</span>\n\n<span class="w">The OBSERVER goes quiet. ...but it does not close its eye.</span>`}
+];
+
+function buildGrid(){
+  const g=document.getElementById('fgrid');
+  FILES.forEach((f,i)=>{
+    const d=document.createElement('div');
+    d.className='fc '+(f.cls||'');d.id='fc-'+i;d.onclick=()=>openFile(i);
+    d.innerHTML=`<div class="ft">${f.t}</div><div class="fn">${f.n}</div><div class="fcode">${f.code}</div><div class="fst" id="fst-${i}">● SEALED</div><div class="flk" id="flk-${i}">🔒</div>`;
+    g.appendChild(d);
+    if(S.filesOpen.includes(i)){d.classList.add('open');document.getElementById('fst-'+i).textContent='● UNLOCKED';document.getElementById('flk-'+i).textContent='🔓';}
+  });
+}
+function openFile(idx){
+  if(idx===11&&S.filesOpen.length<8){document.getElementById('obs-box').textContent='ACCESS DENIED — UNLOCK 8 FILES MINIMUM BEFORE ACCESSING FINAL TRANSMISSION.';return;}
+  if(!S.filesOpen.includes(idx)){
+    S.filesOpen.push(idx);localStorage.setItem('oo_files',JSON.stringify(S.filesOpen));
+    document.getElementById('fc-'+idx).classList.add('open');
+    document.getElementById('fst-'+idx).textContent='● UNLOCKED';
+    document.getElementById('flk-'+idx).textContent='🔓';
+    upProg();
+  }
+  document.getElementById('cp-title').textContent=FILES[idx].t+' // '+FILES[idx].n;
+  const body=document.getElementById('cp-body');body.innerHTML='';
+  const cp=document.getElementById('cpanel');cp.classList.add('on');
+  cp.scrollIntoView({behavior:'smooth',block:'nearest'});
+  FILES[idx].body.split('\n').forEach((line,i)=>setTimeout(()=>{const d=document.createElement('div');d.innerHTML=line;body.appendChild(d);},i*32));
+}
+function closeCp(){document.getElementById('cpanel').classList.remove('on');}
+
+// ═══ BOOT ═══
+window.addEventListener('load',()=>{
+  buildGrid();loadProfile();upProg();
+  twBoot('> OBSERVER // ORACLE FUSION ACTIVE... CORRIDOR TEMPLARS NODE 7-ALPHA... ρtd 0.74... SCENARIO ENGINE ONLINE... 9 TABS LOADED... SPEAK TO THE OBSERVER. QUERY THE ORACLE. MAP YOUR CORRIDORS. THE MOUNTAIN HOLDS.');
+});
+</script>
+</body>
+</html>
